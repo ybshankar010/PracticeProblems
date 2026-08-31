@@ -2,35 +2,35 @@ package in.bhavanishankar.cache;
 
 import java.util.*;
 
-class Record implements Comparable<Record> {
-    private int key,value,lastAcceesed;
+class Node {
+    private  int key, value;
+    private Node prevPointer,nextPointer;
 
-    public Record(int key, int value, int lastAccessed) {
-        this.key = key;
-        this.value = value;
-        this.lastAcceesed = lastAccessed;
+    public Node(int k, int v) {
+        this.key = k;
+        this.value = v;
     }
 
     public int getKey() {
         return key;
     }
 
-    public int getLastAcceesed() {
-        return lastAcceesed;
-    }
-
-    public void setLastAcceesed(int newAccesstimestamp) {
-        this.lastAcceesed = newAccesstimestamp;
-    }
-
     public int getValue() {
         return value;
     }
+    public Node getNext() {
+        return nextPointer;
+    }
 
-    @Override
-    public int compareTo(Record o) {
-        int diff = this.lastAcceesed - o.getLastAcceesed();
-        return Integer.compare(diff,0);
+    public Node getPrev(){
+        return prevPointer;
+    }
+
+    public void setPrev(Node node) {
+        this.prevPointer = node;
+    }
+    public void setNext(Node node) {
+        this.nextPointer = node;
     }
 
     public void setValue(int value) {
@@ -38,50 +38,87 @@ class Record implements Comparable<Record> {
     }
 }
 
+
 public class LRUCache {
 
-    private final Queue<Record> priorityQueue;
     private final int capacity;
-    private final Map<Integer,Record> keyRecordMap;
-    private int currentTimestamp;
+    private final Map<Integer,Node> keyRecordMap;
+    private Node head,tail;
 
     public LRUCache(int capacity){
         this.capacity = capacity;
-        this.priorityQueue = new PriorityQueue<>(capacity);
         this.keyRecordMap = new HashMap<>(capacity);
-        this.currentTimestamp = 0;
+        this.head = this.tail = null;
     }
 
     public int get(int key) {
-        ++this.currentTimestamp;
-        Record record = this.keyRecordMap.get(key);
-        if (record == null) return -1;
-        this.keyRecordMap.put(key,record);
-        this.priorityQueue.remove(record);
-        record.setLastAcceesed(this.currentTimestamp);
-        this.priorityQueue.add(record);
-        return record.getValue();
+        Node curr = this.keyRecordMap.get(key);
+        if (curr == null) return -1;
+        if (curr == this.head) return curr.getValue();
+        Node previousNode,nextNode;
+        if (curr == this.tail) {
+            previousNode = this.tail.getPrev();
+            this.tail.setPrev(null);
+            this.tail = previousNode;
+            this.tail.setNext(null);
+        } else {
+            previousNode = curr.getPrev();
+            nextNode = curr.getNext();
+
+            previousNode.setNext(nextNode);
+            nextNode.setPrev(previousNode);
+            curr.setNext(null);
+            curr.setPrev(null);
+        }
+        addHead(curr);
+
+        return curr.getValue();
+    }
+
+    private void addHead(Node node) {
+        this.head.setPrev(node);
+        node.setNext(this.head);
+        this.head = node;
     }
 
     public void put(int key, int value) {
-        ++this.currentTimestamp;
-        Record record = null;
-        if (keyRecordMap.containsKey(key)) {
-            record = keyRecordMap.get(key);
-            record.setValue(value);
-            record.setLastAcceesed(this.currentTimestamp);
-            this.keyRecordMap.remove(record.getKey());
-            this.priorityQueue.remove(record);
+        Node curr = this.keyRecordMap.get(key);
+        if (curr == null) {
+            curr = new Node(key,value);
+            if(this.head == null) {
+                this.head = this.tail = curr;
+            } else if(this.keyRecordMap.size() == capacity) {
+                this.keyRecordMap.remove(this.tail.getKey());
+                Node previousNode = this.tail.getPrev();
+                if (previousNode != null) {
+                    this.tail.setPrev(null);
+                    this.tail = previousNode;
+                    this.tail.setNext(null);
+                }
+                addHead(curr);
+            } else {
+                addHead(curr);
+            }
         } else {
-            record = new Record(key,value,this.currentTimestamp);
-            if(this.priorityQueue.size() == this.capacity) {
-                Record evict_record = this.priorityQueue.poll();
-                this.keyRecordMap.remove(evict_record.getKey());
-                IO.println("Popped record :: "+evict_record.getKey()+" Value ::"+evict_record.getValue());
+            curr.setValue(value);
+            if (this.tail == curr && this.tail != this.head) {
+                this.tail = this.tail.getPrev();
+                this.tail.setNext(null);
+                addHead(curr);
+            } else if(this.head == curr) {
+                // do nothing
+            } else {
+                Node previousNode = curr.getPrev();
+                Node nextNode = curr.getNext();
+
+                previousNode.setNext(nextNode);
+                nextNode.setPrev(previousNode);
+                curr.setNext(null);
+                curr.setPrev(null);
+                addHead(curr);
             }
         }
 
-        this.priorityQueue.add(record);
-        this.keyRecordMap.put(key, record);
+        this.keyRecordMap.put(key,curr);
     }
 }
