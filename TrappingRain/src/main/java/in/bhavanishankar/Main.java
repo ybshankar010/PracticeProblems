@@ -1,21 +1,17 @@
 package in.bhavanishankar;
 
-import in.bhavanishankar.trappingRain.Solution;
+import in.bhavanishankar.longestValidParanthesis.Solution;
 
 import java.util.Scanner;
 
 public class Main {
     static void main() {
         try(Scanner sc = new Scanner(System.in)) {
-            IO.println(String.format("Enter Array Size"));
-            int size = sc.nextInt();
-            int[] height = new int[size];
-            for (int i=0;i<size;++i){
-                height[i] = sc.nextInt();
-            }
+            IO.println("Enter Parentheses Size");
+            String parentheses = sc.next();
 
             Solution solution = new Solution();
-            IO.println("Trapped water :: "+solution.trap(height));
+            IO.println("longest Parentheses length :: "+ solution.longestValidParentheses(parentheses));
         } catch (Exception e) {
 
         }
