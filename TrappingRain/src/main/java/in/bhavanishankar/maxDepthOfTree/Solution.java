@@ -1,11 +1,5 @@
 package in.bhavanishankar.maxDepthOfTree;
 
-import com.sun.source.tree.Tree;
-
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-
 class TreeNode {
     int val;
     TreeNode left;
