@@ -1,5 +1,7 @@
 package in.bhavanishankar.recoverBST;
 
+import com.sun.source.tree.Tree;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,16 +22,22 @@ class TreeNode {
 
 public class Solution {
 
-    private List<TreeNode> inOrderElements;
+    private TreeNode prev, first,second;
 
     public Solution() {
-        this.inOrderElements = new ArrayList<>();
+        this.prev = this.first = this.second = null;
     }
 
     private void inOrderTraversal(TreeNode root) {
         if (root == null) return;
         inOrderTraversal(root.left);
-        this.inOrderElements.add(root);
+        if (prev != null && prev.val > root.val) {
+            if (first == null) {
+                first = prev;
+            }
+            second = root;
+        }
+        this.prev = root;
         inOrderTraversal(root.right);
     }
 
@@ -37,26 +45,10 @@ public class Solution {
 
         inOrderTraversal(root);
 
-        TreeNode curr,next;
-        TreeNode firstElement = null, secondElement = null;
-        for (int i =0;i<this.inOrderElements.size()-1;++i) {
-            curr = this.inOrderElements.get(i);
-            next = this.inOrderElements.get(i+1);
-            if (curr.val > next.val) {
-                if (firstElement == null) {
-                    firstElement = curr;
-                    secondElement = next;
-                } else {
-                    secondElement = next;
-                    break;
-                }
-            }
-        }
-
-        if (firstElement != null && secondElement != null) {
-            int val = firstElement.val;
-            firstElement.val = secondElement.val;
-            secondElement.val = val;
+        if (this.first != null && this.second != null) {
+            int val = this.first.val;
+            this.first.val = this.second.val;
+            this.second.val = val;
         }
     }
 }
