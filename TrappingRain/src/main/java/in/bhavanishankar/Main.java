@@ -12,7 +12,7 @@ public class Main {
 
             Solution solution = new Solution();
             IO.println("longest Parentheses length :: "+ solution.longestValidParentheses(parentheses));
-        } catch (Exception e) {
+        } catch (Exception _) {
 
         }
     }
